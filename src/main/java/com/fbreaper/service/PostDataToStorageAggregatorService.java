@@ -63,11 +63,12 @@ public class PostDataToStorageAggregatorService {
             List<PostDto> posts = new ArrayList<>();
             fb
                 .setGroupUrl(config.getFbGroupUrl())
-                .login(config.getFbLogin(), config.getFbPass())
+//                .login(config.getFbLogin(), config.getFbPass())
                 .goToGroup()
                 .getPosts(config.getPostsToFetch())
                     .forEach(uiPost -> {
                         PostDto post = DaoUtils.doMapPostUiRepresentationTexDataToDto(uiPost);
+                        log.info("doMapPostUiRepresentationTexDataToDto");
                         posts.add(post);
                     });
             if(postgres){
@@ -76,7 +77,7 @@ public class PostDataToStorageAggregatorService {
             }
             if(excel) {
                 log.debug("***Excel output selected***");
-                //excelService.write(posts);
+//                excelService.write(posts);
             }
 
 

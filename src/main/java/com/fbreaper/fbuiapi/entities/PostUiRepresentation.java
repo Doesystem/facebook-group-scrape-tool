@@ -21,10 +21,11 @@ public class PostUiRepresentation extends AbstractUiEntity {
     private Logger log = LoggerFactory.getLogger(PostUiRepresentation.class);
 
     private SelenideElement rawPost;
-    public static final String POST = "//div[@role='article' and contains(@id,'post') and not(contains(@id,','))]";
-    private static final String POST_AUTHOR_LINK = ".//h5//a";
+    public static final String POST = "//div[@role='article' and @aria-posinset]";
+    private static final String POST_AUTHOR_LINK = ".//h2//a";
     private static final String POST_TIMESTAMP = ".//abbr";
-    private static final String POST_MESSAGE = ".//*[contains(@class,'userContent ')]";
+//    private static final String POST_MESSAGE = ".//*[contains(@class,'userContent ')]";
+    private static final String POST_MESSAGE = ".//div[@data-ad-rendering-role='story_message']";
     private static final String POST_VIEW_MORE_MESSAGE_LINK = ".//*[contains(text(),'more comments')]/ancestor::div[@class='clearfix'][1]";
     private static final String POST_COMMENTS = ".//*[@class='UFICommentActorAndBodySpacing']";
     private static final String POST_COMMENT_LOADER = ".//*[@aria-valuetext='Loading...']";
@@ -36,7 +37,7 @@ public class PostUiRepresentation extends AbstractUiEntity {
     private static final String BUTTON_POST_IMAGES_VIEWER_NEXT = ".//a[@title='Next']";
     private static final SelenideElement POST_PHOTO_THEATER_MAIN_DIALOG_LOADED = $x("//*[@id='photos_snowlift' and contains(@class,'Available')]");
     private static final SelenideElement POST_PHOTO_THEATER_MAIN_DIALOG_NAVIGATABEL = $x("//*[@id='photos_snowlift' and contains(@class,'Activated')]");
-    private static final String POST_LINK = ".//div[contains(@id,'feed_subtitle_')]//a[@target]";
+    private static final String POST_LINK = ".//a[contains(@href,'/posts/') or contains(@href,'story_fbid')]";
     private static int IMAGES_LIMIT = load().fbBigImagesLimit();
     private static Long IMAGES_LOAD_TIMEOUT = load().fbBigImagesLoadTimeout();
 
@@ -115,7 +116,7 @@ public class PostUiRepresentation extends AbstractUiEntity {
         String rawTexts = fetchInnerTextData(rawPost.$x(POST_MESSAGE));
         rawTexts = rawTexts.replace("See Translation", "");
         rawTexts = rawTexts.replace("See More", "");
-        rawTexts = rawTexts.replace("\n", "");
+        rawTexts = rawTexts.replace("\n", " ");
         return rawTexts;
     }
 

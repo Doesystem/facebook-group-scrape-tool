@@ -23,6 +23,7 @@ public abstract class AbstractPage {
         Configuration.browser = BrowserType.FIREFOX;
         Configuration.savePageSource = false;
         Configuration.screenshots = false;
+        Configuration.browserSize = "1920x1080";
     }
 
     public void waitABit(Integer mls){

@@ -11,15 +11,17 @@ import org.springframework.stereotype.Service;
 @SpringBootApplication
 @EnableScheduling
 @Service
-public class FbReaperApplication implements CommandLineRunner{
+public class FbReaperApplication implements CommandLineRunner {
 
 	@Autowired
 	PostDataToFirebaseAggregatorTask postDataToFirebaseAggregatorTask;
 
-	public static void main(String[] args) { SpringApplication.run(FbReaperApplication.class, args); }
+	public static void main(String[] args) {
+		SpringApplication.run(FbReaperApplication.class, args);
+	}
 
 	@Override
-	public void run(String... args){
+	public void run(String... args) {
 		postDataToFirebaseAggregatorTask.aggregatePostData();
 	}
 

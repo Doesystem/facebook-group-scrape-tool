@@ -81,8 +81,8 @@ public class PostDto implements Comparable<PostDto> {
 
     @Override
     public int compareTo(PostDto that) {
-        return Comparator.comparing(PostDto::getPostAuthor)
-                .thenComparing(PostDto::getPostTimeStamp)
+        return Comparator.<PostDto, String>comparing(p -> p.getPostAuthor())
+                .thenComparing(p -> p.getPostTimeStamp())
                 .compare(this, that);
     }
 
@@ -107,6 +107,78 @@ public class PostDto implements Comparable<PostDto> {
         this.postTimeStamp = Long.valueOf(postTimeStamp + "000");
     }
 
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public String getPostAuthor() {
+		return postAuthor;
+	}
+
+	public void setPostAuthor(String postAuthor) {
+		this.postAuthor = postAuthor;
+	}
+
+	public String getPostAuthorUrl() {
+		return postAuthorUrl;
+	}
+
+	public void setPostAuthorUrl(String postAuthorUrl) {
+		this.postAuthorUrl = postAuthorUrl;
+	}
+
+	public Long getPostLastUpdate() {
+		return postLastUpdate;
+	}
+
+	public void setPostLastUpdate(Long postLastUpdate) {
+		this.postLastUpdate = postLastUpdate;
+	}
+
+	public Long getPostTimeStamp() {
+		return postTimeStamp;
+	}
+
+	public void setPostTimeStamp(Long postTimeStamp) {
+		this.postTimeStamp = postTimeStamp;
+	}
+
+	public String getPostText() {
+		return postText;
+	}
+
+	public void setPostText(String postText) {
+		this.postText = postText;
+	}
+
+	public String getPostType() {
+		return postType;
+	}
+
+	public void setPostType(String postType) {
+		this.postType = postType;
+	}
+
+	public String getPostLink() {
+		return postLink;
+	}
+
+	public void setPostLink(String postLink) {
+		this.postLink = postLink;
+	}
+
+	public List<PostImage> getImages() {
+		return images;
+	}
+
+	public void setImages(List<PostImage> images) {
+		this.images = images;
+	}
+
 //    /*Timstamp formated similar to facebook UI. Needs to compare.*/
 //    public String getOriginPostTimeStamp(){
 //        try {
@@ -116,4 +188,6 @@ public class PostDto implements Comparable<PostDto> {
 //            return "0000000000";
 //        }
 //    }
+    
+    
 }
