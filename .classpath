@@ -36,6 +36,5 @@
 			<attribute name="optional" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lombok-1.18.4.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
