@@ -17,6 +17,5 @@ COPY src/main/resources/properties/PostDataToFirebase.properties PostDataToFireb
 
 ENTRYPOINT ["java", \
     "-jar", "app.jar", \
-    "--browser.headless=true", \
     "--spring.config.location=file:application.properties", \
     "--spring.config.additional-location=file:PostDataToFirebase.properties"]

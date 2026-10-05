@@ -49,19 +49,30 @@ Currently, export data into `.xsl` file and `postgres` is not supported
  1. Run JAR: `java -jar fbreaper-MILESTONE-2.1.jar --scheduling.enabled=false`
  2. Run JAR with scheduling: `java -jar target\fbreaper-MILESTONE-2.1.jar --scheduling.enabled=true --cron.expression="* */5 * * * *"`
 
-#### Run with Docker (Linux server recommended):
+#### Run with Docker Compose (Linux server recommended):
  1. Build JAR first: `mvn clean package -DskipTests`
- 2. Build Docker image: `docker build -t fbreaper .`
- 3. Run once: `docker run --rm fbreaper --scheduling.enabled=false`
- 4. Run with scheduling:
+ 2. Copy and edit environment file:
  ```bash
- docker run -d \
-   -e SCHEDULING_ENABLED=true \
-   fbreaper \
-   --scheduling.enabled=true \
-   --cron.expression="* */5 * * * *"
+ cp .env.example .env
+ # Edit .env with your database credentials
  ```
- > Firefox is pre-installed in the Docker image. No display or Xvfb needed — headless is enabled automatically via `--browser.headless=true` in Dockerfile.
+ 3. Start PostgreSQL + app:
+ ```bash
+ docker compose up --build
+ ```
+ 4. Run with scheduling (keep running):
+    - Edit `docker-compose.yml`, uncomment the scheduler command block
+    - Then: `docker compose up -d --build`
+
+ 5. Stop and clean up:
+ ```bash
+ docker compose down
+ # To also remove DB data:
+ docker compose down -v
+ ```
+ > PostgreSQL is exposed on port **25432** for external access (e.g. DBeaver, pgAdmin).
+ > Firefox and PostgreSQL are both included. No manual installation needed.
+ > `.env` is gitignored — never commit real credentials.
  
 ### Availabel parameters:  
   
