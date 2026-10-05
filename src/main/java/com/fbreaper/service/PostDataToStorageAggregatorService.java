@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @PropertySource(value = "classpath:properties/PostDataToFirebase.properties")
@@ -42,68 +43,79 @@ public class PostDataToStorageAggregatorService {
     private boolean excel = false;
     private boolean postgres = false;
 
-
     @PostConstruct
     public void initProp() {
-        if(export!=null && !export.isEmpty()) {
-            String output[] = export.split("&");
-            for(String o : output){
-                if(o.trim().equalsIgnoreCase("excel")) excel = true;
-                if(o.trim().equalsIgnoreCase("postgres")) postgres = true;
+        if (export != null && !export.isEmpty()) {
+            String[] output = export.split("&");
+            for (String o : output) {
+                if (o.trim().equalsIgnoreCase("excel")) excel = true;
+                if (o.trim().equalsIgnoreCase("postgres")) postgres = true;
             }
         } else {
             log.error("Output is not specified at 'export' parameter");
         }
     }
 
-    public void aggregatePostData(){
-        log.info("Starting aggregate data...");
+    private static final String FB_GROUP_BASE_URL = "https://www.facebook.com/groups/";
+
+    public void aggregatePostData() {
+        log.info("Starting aggregate data for {} group(s)...", config.getFbGroupIds().size());
         try {
-
-            List<PostDto> posts = new ArrayList<>();
-            fb
-                .setGroupUrl(config.getFbGroupUrl())
-//                .login(config.getFbLogin(), config.getFbPass())
-                .goToGroup()
-                .getPosts(config.getPostsToFetch())
-                    .forEach(uiPost -> {
-                        PostDto post = DaoUtils.doMapPostUiRepresentationTexDataToDto(uiPost);
-                        log.info("doMapPostUiRepresentationTexDataToDto");
-                        posts.add(post);
-                    });
-            if(postgres){
-                log.debug("***Postgres output selected***");
-                List<PostDto> newPosts = posts.stream()
-                        .filter(post -> {
-                            if (post.getGroupId() == null || post.getPostFbId() == null) {
-                                log.warn("Skipping post with null groupId/postFbId: link=[{}]", post.getPostLink());
-                                return false;
-                            }
-                            boolean exists = postgreSqlRepository.existsByGroupIdAndPostFbId(post.getGroupId(), post.getPostFbId());
-                            if (exists) {
-                                log.info("Skipping duplicate post: groupId=[{}] postFbId=[{}]", post.getGroupId(), post.getPostFbId());
-                            }
-                            return !exists;
-                        })
-                        .collect(java.util.stream.Collectors.toList());
-                log.info("Saving {}/{} new posts (skipped {} duplicates)", newPosts.size(), posts.size(), posts.size() - newPosts.size());
-                postgreSqlRepository.saveAll(newPosts);
+            for (String groupId : config.getFbGroupIds()) {
+                String trimmedId = groupId.trim();
+                String groupUrl = FB_GROUP_BASE_URL + trimmedId;
+                log.info("Processing group id: {} -> {}", trimmedId, groupUrl);
+                try {
+                    aggregateGroupData(groupUrl);
+                } catch (Throwable t) {
+                    log.error("Failed to process group [{}]: {}", trimmedId, t.getMessage(), t);
+                }
             }
-            if(excel) {
-                log.debug("***Excel output selected***");
-//                excelService.write(posts);
-            }
-
-
-
         } finally {
             try {
                 WebDriverRunner.getWebDriver().quit();
-            } catch (Throwable t){
-                log.warn("IGNORE ERROR [" + t + "] during browser closing...");
+            } catch (Throwable t) {
+                log.warn("IGNORE ERROR [{}] during browser closing...", t.getMessage());
             }
         }
         log.info("Task execution finished. Waiting for next launch according to schedule...");
+    }
+
+    private void aggregateGroupData(String groupUrl) {
+        List<PostDto> posts = new ArrayList<>();
+        fb
+            .setGroupUrl(groupUrl)
+//            .login(config.getFbLogin(), config.getFbPass())
+            .goToGroup()
+            .getPosts(config.getPostsToFetch())
+                .forEach(uiPost -> {
+                    PostDto post = DaoUtils.doMapPostUiRepresentationTexDataToDto(uiPost);
+                    log.info("doMapPostUiRepresentationTexDataToDto");
+                    posts.add(post);
+                });
+
+        if (postgres) {
+            log.debug("***Postgres output selected***");
+            List<PostDto> newPosts = posts.stream()
+                    .filter(post -> {
+                        if (post.getGroupId() == null || post.getPostFbId() == null) {
+                            log.warn("Skipping post with null groupId/postFbId: link=[{}]", post.getPostLink());
+                            return false;
+                        }
+                        boolean exists = postgreSqlRepository.existsByGroupIdAndPostFbId(post.getGroupId(), post.getPostFbId());
+                        if (exists) {
+                            log.info("Skipping duplicate post: groupId=[{}] postFbId=[{}]", post.getGroupId(), post.getPostFbId());
+                        }
+                        return !exists;
+                    })
+                    .collect(Collectors.toList());
+            log.info("Saving {}/{} new posts (skipped {} duplicates)", newPosts.size(), posts.size(), posts.size() - newPosts.size());
+            postgreSqlRepository.saveAll(newPosts);
+        }
+        if (excel) {
+            log.debug("***Excel output selected***");
+//            excelService.write(posts);
+        }
     }
 
 }
