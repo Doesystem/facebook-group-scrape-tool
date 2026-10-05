@@ -48,6 +48,20 @@ Currently, export data into `.xsl` file and `postgres` is not supported
 
  1. Run JAR: `java -jar fbreaper-MILESTONE-2.1.jar --scheduling.enabled=false`
  2. Run JAR with scheduling: `java -jar target\fbreaper-MILESTONE-2.1.jar --scheduling.enabled=true --cron.expression="* */5 * * * *"`
+
+#### Run with Docker (Linux server recommended):
+ 1. Build JAR first: `mvn clean package -DskipTests`
+ 2. Build Docker image: `docker build -t fbreaper .`
+ 3. Run once: `docker run --rm fbreaper --scheduling.enabled=false`
+ 4. Run with scheduling:
+ ```bash
+ docker run -d \
+   -e SCHEDULING_ENABLED=true \
+   fbreaper \
+   --scheduling.enabled=true \
+   --cron.expression="* */5 * * * *"
+ ```
+ > Firefox is pre-installed in the Docker image. No display or Xvfb needed — headless is enabled automatically via `--browser.headless=true` in Dockerfile.
  
 ### Availabel parameters:  
   
