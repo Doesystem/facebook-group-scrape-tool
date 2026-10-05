@@ -65,5 +65,6 @@ Currently, export data into `.xsl` file and `postgres` is not supported
     fb.big.images.limit
     fb.big.images.load.timeout
     selenide.timeout
+    browser.headless     (false = visible browser, true = headless for Linux server)
 
 Questions? Feel free to email me postullat2@gmail.com
