@@ -16,11 +16,44 @@ public class DaoUtils {
         dto.setPostText(uiEntity.fetchPostMessageWithNoDuplicationAndFilter());
 //        dto.setPostTimeStampWithMls(uiEntity.fetchPostTimestamp());
         dto.setPostAuthorUrl(cleanFbTrackingParams(uiEntity.fetchPostAuthorProfileLink()));
-        dto.setPostLink(cleanFbTrackingParams(uiEntity.fetchPostLink()));
+        String cleanLink = cleanFbTrackingParams(uiEntity.fetchPostLink());
+        dto.setPostLink(cleanLink);
+        parseFbGroupAndPostId(dto, cleanLink);
         //setPostType(dto);
-        log.info("Mapped PostDto -> author: [{}], postText: [{}], link: [{}]",
-                dto.getPostAuthor(), dto.getPostText(), dto.getPostLink());
+        log.info("Mapped PostDto -> author: [{}], groupId: [{}], postFbId: [{}], postText: [{}]",
+                dto.getPostAuthor(), dto.getGroupId(), dto.getPostFbId(), dto.getPostText());
         return dto;
+    }
+
+    /**
+     * Parse group_id และ post_id จาก Facebook URL
+     * รองรับสองรูปแบบ:
+     * - https://www.facebook.com/groups/1489819158035015/posts/2917388565278060/
+     * - https://www.facebook.com/permalink.php?story_fbid=xxx&id=yyy
+     */
+    static void parseFbGroupAndPostId(PostDto dto, String url) {
+        if (url == null || url.equals("NO DATA")) return;
+        try {
+            // รูปแบบ /groups/{groupId}/posts/{postId}/
+            java.util.regex.Matcher m = java.util.regex.Pattern
+                    .compile("/groups/(\\d+)/posts/(\\d+)")
+                    .matcher(url);
+            if (m.find()) {
+                dto.setGroupId(m.group(1));
+                dto.setPostFbId(m.group(2));
+                return;
+            }
+            // รูปแบบ permalink.php?story_fbid={postId}&id={groupId}
+            m = java.util.regex.Pattern
+                    .compile("[?&]story_fbid=([^&]+).*[?&]id=(\\d+)")
+                    .matcher(url);
+            if (m.find()) {
+                dto.setPostFbId(m.group(1));
+                dto.setGroupId(m.group(2));
+            }
+        } catch (Exception e) {
+            log.warn("parseFbGroupAndPostId: failed to parse url [{}]: {}", url, e.getMessage());
+        }
     }
 
     /**

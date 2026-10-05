@@ -73,7 +73,21 @@ public class PostDataToStorageAggregatorService {
                     });
             if(postgres){
                 log.debug("***Postgres output selected***");
-                postgreSqlRepository.saveAll(posts);
+                List<PostDto> newPosts = posts.stream()
+                        .filter(post -> {
+                            if (post.getGroupId() == null || post.getPostFbId() == null) {
+                                log.warn("Skipping post with null groupId/postFbId: link=[{}]", post.getPostLink());
+                                return false;
+                            }
+                            boolean exists = postgreSqlRepository.existsByGroupIdAndPostFbId(post.getGroupId(), post.getPostFbId());
+                            if (exists) {
+                                log.info("Skipping duplicate post: groupId=[{}] postFbId=[{}]", post.getGroupId(), post.getPostFbId());
+                            }
+                            return !exists;
+                        })
+                        .collect(java.util.stream.Collectors.toList());
+                log.info("Saving {}/{} new posts (skipped {} duplicates)", newPosts.size(), posts.size(), posts.size() - newPosts.size());
+                postgreSqlRepository.saveAll(newPosts);
             }
             if(excel) {
                 log.debug("***Excel output selected***");

@@ -1,20 +1,41 @@
 package com.fbreaper.domain;
 
-import com.google.cloud.firestore.annotation.Exclude;
-import lombok.Data;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
-import javax.persistence.*;
-import java.util.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
+import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "group_posts")
+@Table(name = "group_posts", uniqueConstraints = {
+    @UniqueConstraint(name = "uk_group_post", columnNames = {"group_id", "post_id"})
+})
 public class PostDto implements Comparable<PostDto> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     private Integer id;
+
+    @Column(name = "group_id")
+    private String groupId;
+
+    @Column(name = "post_id")
+    private String postFbId;
 
     @Column(name = "post_author")
     private String postAuthor;
@@ -113,6 +134,22 @@ public class PostDto implements Comparable<PostDto> {
 
 	public void setId(Integer id) {
 		this.id = id;
+	}
+
+	public String getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
+	}
+
+	public String getPostFbId() {
+		return postFbId;
+	}
+
+	public void setPostFbId(String postFbId) {
+		this.postFbId = postFbId;
 	}
 
 	public String getPostAuthor() {

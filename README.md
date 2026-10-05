@@ -27,7 +27,17 @@ Currently, export data into `.xsl` file and `postgres` is not supported
 #### Requirements:  
 - java 8;   
 - maven 3.6.0
-- FireFox 60.3.0esr (64-bit);  
+- FireFox 60.3.0esr (64-bit);
+- PostgreSQL
+
+#### Database setup:
+ 1. Create database `fbdata` in PostgreSQL
+ 2. Run the application once — Hibernate will auto-create the `group_posts` table
+ 3. After first run, execute the following SQL to add the unique constraint for deduplication:
+ ```sql
+ ALTER TABLE group_posts ADD CONSTRAINT uk_group_post UNIQUE (group_id, post_id);
+ ```
+ > This constraint prevents duplicate posts from being inserted on subsequent scheduler runs.
 
 #### Build project: 
  1. Adjust project settings in `PostDataToFirebase.properties` and `application.properties` files
