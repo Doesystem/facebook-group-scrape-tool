@@ -1,5 +1,6 @@
 package com.fbreaper.domain;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -13,7 +14,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -21,8 +24,15 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "group_posts", uniqueConstraints = {
-    @UniqueConstraint(name = "uk_group_post", columnNames = {"group_id", "post_id"})
+@Table(name = "group_posts",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_group_post", columnNames = {"group_id", "post_id"})
+    },
+    indexes = {
+        @Index(name = "idx_create_date", columnList = "create_date"),
+        @Index(name = "idx_status", columnList = "status")
+    }
+)
 })
 public class PostDto implements Comparable<PostDto> {
 
@@ -57,6 +67,20 @@ public class PostDto implements Comparable<PostDto> {
 
     @Column(name = "post_link", columnDefinition="TEXT")
     private String postLink;
+
+    @Column(name = "create_date", nullable = false, updatable = false)
+    private LocalDateTime createDate;
+
+    @Column(name = "status", nullable = false)
+    private Integer status;
+
+    @PrePersist
+    private void prePersist() {
+        this.createDate = LocalDateTime.now();
+        if (this.status == null) {
+            this.status = 0;
+        }
+    }
 
     @OneToMany(
             cascade = CascadeType.ALL,
@@ -206,6 +230,22 @@ public class PostDto implements Comparable<PostDto> {
 
 	public void setPostLink(String postLink) {
 		this.postLink = postLink;
+	}
+
+	public LocalDateTime getCreateDate() {
+		return createDate;
+	}
+
+	public void setCreateDate(LocalDateTime createDate) {
+		this.createDate = createDate;
+	}
+
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
 	}
 
 	public List<PostImage> getImages() {

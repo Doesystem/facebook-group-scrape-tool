@@ -33,11 +33,13 @@ Currently, export data into `.xsl` file and `postgres` is not supported
 #### Database setup:
  1. Create database `fbdata` in PostgreSQL
  2. Run the application once — Hibernate will auto-create the `group_posts` table
- 3. After first run, execute the following SQL to add the unique constraint for deduplication:
+ 3. After first run, execute the following SQL to add the unique constraint and indexes for deduplication and query performance:
  ```sql
  ALTER TABLE group_posts ADD CONSTRAINT uk_group_post UNIQUE (group_id, post_id);
+ CREATE INDEX IF NOT EXISTS idx_create_date ON group_posts (create_date);
+ CREATE INDEX IF NOT EXISTS idx_status ON group_posts (status);
  ```
- > This constraint prevents duplicate posts from being inserted on subsequent scheduler runs.
+ > `create_date` is set automatically on insert (sysdate). `status` defaults to 0 (new post).
 
 #### Build project: 
  1. Adjust project settings in `PostDataToFirebase.properties` and `application.properties` files
