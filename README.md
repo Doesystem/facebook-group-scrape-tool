@@ -54,21 +54,32 @@ Currently, export data into `.xsl` file and `postgres` is not supported
  2. Copy and edit environment file:
  ```bash
  cp .env.example .env
- # Edit .env with your database credentials
+ # Edit .env with your database credentials and host
  ```
- 3. Start PostgreSQL + app:
+ 3. Start database (run once, on the DB server):
+ ```bash
+ docker compose -f docker-compose.db.yml up -d
+ ```
+ 4. Start scraper (can run on same or different machine):
  ```bash
  docker compose up --build
  ```
- 4. Run with scheduling (keep running):
+ 5. Run on a **different machine** pointing to existing DB:
+    - Set `POSTGRES_HOST` and `POSTGRES_PORT` in `.env` to the DB server IP
+    - Then: `docker compose up --build`
+
+ 6. Run with scheduling (keep running):
     - Edit `docker-compose.yml`, uncomment the scheduler command block
     - Then: `docker compose up -d --build`
 
- 5. Stop and clean up:
+ 7. Stop and clean up:
  ```bash
+ # Stop scraper only
  docker compose down
- # To also remove DB data:
- docker compose down -v
+ # Stop database (and keep data)
+ docker compose -f docker-compose.db.yml down
+ # Stop database and remove all data
+ docker compose -f docker-compose.db.yml down -v
  ```
  > PostgreSQL is exposed on port **25432** for external access (e.g. DBeaver, pgAdmin).
  > Firefox and PostgreSQL are both included. No manual installation needed.
