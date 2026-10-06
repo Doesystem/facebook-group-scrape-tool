@@ -32,14 +32,34 @@ public class GroupPage extends AbstractPage {
     }
 
     public void open(){
+        log.info("GroupPage.open() v7 - open -> sleep4s -> click Close -> sleep5s -> query");
         Selenide.open(url);
+        // รอให้ popup โหลดขึ้นมาก่อน
+        Selenide.sleep(4000);
+        // คลิก close button ของ popup login แทน ESCAPE
+        log.info("Clicking popup close button...");
+        SelenideElement closeBtn = $x("//*[@aria-label='Close']");
+        if (closeBtn.is(Condition.exist)) {
+            closeBtn.click();
+            log.info("Popup closed via close button");
+        } else {
+            log.warn("Close button not found, trying ESCAPE...");
+            $x("//body").sendKeys(Keys.ESCAPE);
+        }
+        // รอหลังปิด popup ให้ Facebook render posts เพิ่ม
+        Selenide.sleep(5000);
+        List<SelenideElement> posts = $$x(POST);
+        log.info("Posts after close+sleep: {}", posts.size());
         $$x(POST).shouldHave(CollectionCondition.sizeGreaterThan(0));
-        $x("//body").sendKeys(Keys.ESCAPE);
         $$x(POST).get(0).should(Condition.visible);
     }
 
     public List<SelenideElement> getAllPosts(){
-        return $$x(POST);
+        // snapshot หลัง sleep ใน open() แล้ว รอ stabilize อีกนิด
+        Selenide.sleep(1000);
+        List<SelenideElement> posts = $$x(POST);
+        log.debug("getAllPosts snapshot: {} posts", posts.size());
+        return posts;
     }
 
     public List<SelenideElement> getNewPostsBatch(Integer timeOut){

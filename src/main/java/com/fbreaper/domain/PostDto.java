@@ -1,20 +1,51 @@
 package com.fbreaper.domain;
 
-import com.google.cloud.firestore.annotation.Exclude;
-import lombok.Data;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
-import javax.persistence.*;
-import java.util.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
+import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "group_posts")
+@Table(name = "group_posts",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_group_post", columnNames = {"group_id", "post_id"})
+    },
+    indexes = {
+        @Index(name = "idx_create_date", columnList = "create_date"),
+        @Index(name = "idx_status", columnList = "status")
+    }
+)
+})
 public class PostDto implements Comparable<PostDto> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     private Integer id;
+
+    @Column(name = "group_id")
+    private String groupId;
+
+    @Column(name = "post_id")
+    private String postFbId;
 
     @Column(name = "post_author")
     private String postAuthor;
@@ -36,6 +67,20 @@ public class PostDto implements Comparable<PostDto> {
 
     @Column(name = "post_link", columnDefinition="TEXT")
     private String postLink;
+
+    @Column(name = "create_date", nullable = false, updatable = false)
+    private LocalDateTime createDate;
+
+    @Column(name = "status", nullable = false)
+    private Integer status;
+
+    @PrePersist
+    private void prePersist() {
+        this.createDate = LocalDateTime.now();
+        if (this.status == null) {
+            this.status = 0;
+        }
+    }
 
     @OneToMany(
             cascade = CascadeType.ALL,
@@ -81,8 +126,8 @@ public class PostDto implements Comparable<PostDto> {
 
     @Override
     public int compareTo(PostDto that) {
-        return Comparator.comparing(PostDto::getPostAuthor)
-                .thenComparing(PostDto::getPostTimeStamp)
+        return Comparator.<PostDto, String>comparing(p -> p.getPostAuthor())
+                .thenComparing(p -> p.getPostTimeStamp())
                 .compare(this, that);
     }
 
@@ -107,6 +152,110 @@ public class PostDto implements Comparable<PostDto> {
         this.postTimeStamp = Long.valueOf(postTimeStamp + "000");
     }
 
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public String getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
+	}
+
+	public String getPostFbId() {
+		return postFbId;
+	}
+
+	public void setPostFbId(String postFbId) {
+		this.postFbId = postFbId;
+	}
+
+	public String getPostAuthor() {
+		return postAuthor;
+	}
+
+	public void setPostAuthor(String postAuthor) {
+		this.postAuthor = postAuthor;
+	}
+
+	public String getPostAuthorUrl() {
+		return postAuthorUrl;
+	}
+
+	public void setPostAuthorUrl(String postAuthorUrl) {
+		this.postAuthorUrl = postAuthorUrl;
+	}
+
+	public Long getPostLastUpdate() {
+		return postLastUpdate;
+	}
+
+	public void setPostLastUpdate(Long postLastUpdate) {
+		this.postLastUpdate = postLastUpdate;
+	}
+
+	public Long getPostTimeStamp() {
+		return postTimeStamp;
+	}
+
+	public void setPostTimeStamp(Long postTimeStamp) {
+		this.postTimeStamp = postTimeStamp;
+	}
+
+	public String getPostText() {
+		return postText;
+	}
+
+	public void setPostText(String postText) {
+		this.postText = postText;
+	}
+
+	public String getPostType() {
+		return postType;
+	}
+
+	public void setPostType(String postType) {
+		this.postType = postType;
+	}
+
+	public String getPostLink() {
+		return postLink;
+	}
+
+	public void setPostLink(String postLink) {
+		this.postLink = postLink;
+	}
+
+	public LocalDateTime getCreateDate() {
+		return createDate;
+	}
+
+	public void setCreateDate(LocalDateTime createDate) {
+		this.createDate = createDate;
+	}
+
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
+
+	public List<PostImage> getImages() {
+		return images;
+	}
+
+	public void setImages(List<PostImage> images) {
+		this.images = images;
+	}
+
 //    /*Timstamp formated similar to facebook UI. Needs to compare.*/
 //    public String getOriginPostTimeStamp(){
 //        try {
@@ -116,4 +265,6 @@ public class PostDto implements Comparable<PostDto> {
 //            return "0000000000";
 //        }
 //    }
+    
+    
 }

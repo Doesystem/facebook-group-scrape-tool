@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  fbreaper:
+    build: .
+    container_name: fbreaper-app
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${POSTGRES_HOST:-localhost}:${POSTGRES_PORT:-25432}/${POSTGRES_DB}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - FLYWAY_URL=jdbc:postgresql://${POSTGRES_HOST:-localhost}:${POSTGRES_PORT:-25432}/${POSTGRES_DB}
+      - FLYWAY_USER=${POSTGRES_USER}
+      - FLYWAY_PASSWORD=${POSTGRES_PASSWORD}
+    command:
+      - "--scheduling.enabled=false"
+      - "--browser.headless=true"
+    # Uncomment below for scheduler mode:
+    # command:
+    #   - "--scheduling.enabled=true"
+    #   - "--scheduling.fixed.delay.ms=300000"
+    #   - "--browser.headless=true"

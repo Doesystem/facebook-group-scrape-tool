@@ -17,12 +17,17 @@ public abstract class AbstractPage {
     @Value("${selenide.timeout}")
     long timeout;
 
+    @Value("${browser.headless:false}")
+    boolean headless;
+
     @PostConstruct
     private void applySelenideConfig(){
         Configuration.timeout = timeout;
         Configuration.browser = BrowserType.FIREFOX;
+        Configuration.headless = headless;
         Configuration.savePageSource = false;
         Configuration.screenshots = false;
+        Configuration.browserSize = "1920x1080";
     }
 
     public void waitABit(Integer mls){

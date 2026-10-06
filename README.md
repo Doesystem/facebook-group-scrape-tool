@@ -27,7 +27,19 @@ Currently, export data into `.xsl` file and `postgres` is not supported
 #### Requirements:  
 - java 8;   
 - maven 3.6.0
-- FireFox 60.3.0esr (64-bit);  
+- FireFox 60.3.0esr (64-bit);
+- PostgreSQL
+
+#### Database setup:
+ 1. Create database `fbdata` in PostgreSQL
+ 2. Run the application once — Hibernate will auto-create the `group_posts` table
+ 3. After first run, execute the following SQL to add the unique constraint and indexes for deduplication and query performance:
+ ```sql
+ ALTER TABLE group_posts ADD CONSTRAINT uk_group_post UNIQUE (group_id, post_id);
+ CREATE INDEX IF NOT EXISTS idx_create_date ON group_posts (create_date);
+ CREATE INDEX IF NOT EXISTS idx_status ON group_posts (status);
+ ```
+ > `create_date` is set automatically on insert (sysdate). `status` defaults to 0 (new post).
 
 #### Build project: 
  1. Adjust project settings in `PostDataToFirebase.properties` and `application.properties` files
@@ -37,7 +49,43 @@ Currently, export data into `.xsl` file and `postgres` is not supported
 #### Run project: 
 
  1. Run JAR: `java -jar fbreaper-MILESTONE-2.1.jar --scheduling.enabled=false`
- 2. Run JAR with scheduling: `java -jar target\fbreaper-MILESTONE-2.1.jar --scheduling.enabled=true --cron.expression="* */5 * * * *"`
+ 2. Run JAR with scheduling: `java -jar target\fbreaper-MILESTONE-2.1.jar --scheduling.enabled=true --scheduling.fixed.delay.ms=300000`
+
+#### Run with Docker Compose (Linux server recommended):
+ 1. Build JAR first: `mvn clean package -DskipTests`
+ 2. Copy and edit environment file:
+ ```bash
+ cp .env.example .env
+ # Edit .env with your database credentials and host
+ ```
+ 3. Start database (run once, on the DB server):
+ ```bash
+ docker compose -f docker-compose.db.yml up -d
+ ```
+ 4. Start scraper (can run on same or different machine):
+ ```bash
+ docker compose up --build
+ ```
+ 5. Run on a **different machine** pointing to existing DB:
+    - Set `POSTGRES_HOST` and `POSTGRES_PORT` in `.env` to the DB server IP
+    - Then: `docker compose up --build`
+
+ 6. Run with scheduling (keep running):
+    - Edit `docker-compose.yml`, uncomment the scheduler command block
+    - Then: `docker compose up -d --build`
+
+ 7. Stop and clean up:
+ ```bash
+ # Stop scraper only
+ docker compose down
+ # Stop database (and keep data)
+ docker compose -f docker-compose.db.yml down
+ # Stop database and remove all data
+ docker compose -f docker-compose.db.yml down -v
+ ```
+ > PostgreSQL is exposed on port **25432** for external access (e.g. DBeaver, pgAdmin).
+ > Firefox and PostgreSQL are both included. No manual installation needed.
+ > `.env` is gitignored — never commit real credentials.
  
 ### Availabel parameters:  
   
@@ -51,9 +99,10 @@ Currently, export data into `.xsl` file and `postgres` is not supported
  
     firebase.jsonfile.path
     firebase.storage.bucket
-    cron.expression
+    scheduling.fixed.delay.ms   (delay in ms after previous job finishes, default: 300000 = 5 min)
     fb.big.images.limit
     fb.big.images.load.timeout
     selenide.timeout
+    browser.headless     (false = visible browser, true = headless for Linux server)
 
 Questions? Feel free to email me postullat2@gmail.com

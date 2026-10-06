@@ -1,26 +1,29 @@
 package com.fbreaper.schedulers;
 
-import com.fbreaper.service.PostDataToStorageAggregatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.fbreaper.service.PostDataToStorageAggregatorService;
+
 @Service
 public class PostDataToFirebaseAggregatorTask {
 
-    @Autowired
-    PostDataToStorageAggregatorService postDataToFirebaseAggregator;
+	@Autowired
+	PostDataToStorageAggregatorService postDataToFirebaseAggregator;
 
-    @Value("${scheduling.enabled}")
-    private Boolean isSchedulingEnabled;
+	@Value("${scheduling.enabled}")
+	private Boolean isSchedulingEnabled;
 
-    private Logger log = LoggerFactory.getLogger(PostDataToFirebaseAggregatorTask.class);
+	private Logger log = LoggerFactory.getLogger(PostDataToFirebaseAggregatorTask.class);
 
-    public void aggregatePostData(){
-        if (isSchedulingEnabled) return;
-        postDataToFirebaseAggregator.aggregatePostData();
-    }
+	public void aggregatePostData() {
+		log.info("isSchedulingEnabled: {}", isSchedulingEnabled);
+		if (!isSchedulingEnabled) {
+			postDataToFirebaseAggregator.aggregatePostData();
+		}
+	}
 
 }

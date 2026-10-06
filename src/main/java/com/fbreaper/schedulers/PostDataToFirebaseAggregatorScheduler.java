@@ -16,14 +16,14 @@ public class PostDataToFirebaseAggregatorScheduler {
     @Autowired
     PostDataToStorageAggregatorService postDataToFirebaseAggregator;
 
-    @Value("${cron.expression}")
-    String cronExpression;
+    @Value("${scheduling.fixed.delay.ms}")
+    long fixedDelayMs;
 
     private Logger log = LoggerFactory.getLogger(PostDataToFirebaseAggregatorScheduler.class);
 
-    @Scheduled(cron = "${cron.expression}")
+    @Scheduled(fixedDelayString = "${scheduling.fixed.delay.ms}")
     public void schedulerPostDataToFirebaseAggregator(){
-        log.info("Application will be execute according to CRON '" + cronExpression + "'");
+        log.info("Starting scheduled run (fixedDelay: {}ms)...", fixedDelayMs);
         postDataToFirebaseAggregator.aggregatePostData();
     }
 

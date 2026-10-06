@@ -60,21 +60,26 @@ public class FbUiInteractionService {
     }
 
     public List<PostUiRepresentation> getPosts(Integer postsCount){
-        Integer count = postsCount + 1;
+    	log.info("getPosts: " + postsCount);
+//        Integer count = postsCount + 1;
         List<SelenideElement> posts = groupPage.getAllPosts();
-        if (posts.size() >= count) {
-            log.info("Found '" + posts.size() + "' POSTS. For proceeding prepare '" + posts.subList(0, count).size() + "'");
-            return wrapRawPosts(posts.subList(0, count));
-        }
-        for (int i = 0; i < 20; i++){
+        log.info("Found '" + posts.size() + "' POSTS.");
+//        if (posts.size() >= count) {
+//            log.info("Found '" + posts.size() + "' POSTS. For proceeding prepare '" + posts.size() + "'");
+//            return wrapRawPosts(posts);
+//        }
+        for (int i = 0; i < 3; i++){
             posts = getPostsWithRetry();
-            if (posts.size() >= count){
-                log.info("Found '" + posts.size() + "' POSTS. For proceeding prepare '" + posts.subList(0, count).size() + "'");
-                return wrapRawPosts(posts.subList(0, count));
-            }
+//            if (posts.size() >= count){
+//                log.info("Found '" + posts.size() + "' POSTS. For proceeding prepare '" + posts.subList(0, count).size() + "'");
+//                return wrapRawPosts(posts.subList(0, count));
+//            }
         }
-        throw new RuntimeException("Can't get all posts [search dip = 20 iterations, can't download '" + count + "']." +
-                " Current posts quantity '" + posts.size() + "'!");
+        
+        log.info("Found '" + posts.size() + "' POSTS. For proceeding prepare '" + posts.size() + "'");
+        return wrapRawPosts(posts);
+//        throw new RuntimeException("Can't get all posts [search dip = 20 iterations, can't download '" + count + "']." +
+//                " Current posts quantity '" + posts.size() + "'!");
     }
 
     private List<PostUiRepresentation> wrapRawPosts(List<SelenideElement> rawPosts){
@@ -86,12 +91,11 @@ public class FbUiInteractionService {
             try {
                 return groupPage.getNewPostsBatch(postsBatchLoadPause);
             }catch (Error e){
-                postsBatchLoadPause = postsBatchLoadPause * 2;
-                log.warn("Fail to load POSTS batch! Time out for batches load will increase to '" + postsBatchLoadPause + "' and try again...");
+                log.warn("Fail to load POSTS batch! No more posts to load or timeout. Returning current posts.");
+                return groupPage.getAllPosts();
             }
-            groupPage.open();
         }
-        throw new RuntimeException("Fail to load posts butches after all attempts...");
+        return groupPage.getAllPosts();
     }
 
 }
