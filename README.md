@@ -47,7 +47,7 @@ Currently, export data into `.xsl` file and `postgres` is not supported
 #### Run project: 
 
  1. Run JAR: `java -jar fbreaper-MILESTONE-2.1.jar --scheduling.enabled=false`
- 2. Run JAR with scheduling: `java -jar target\fbreaper-MILESTONE-2.1.jar --scheduling.enabled=true --cron.expression="* */5 * * * *"`
+ 2. Run JAR with scheduling: `java -jar target\fbreaper-MILESTONE-2.1.jar --scheduling.enabled=true --scheduling.fixed.delay.ms=300000`
 
 #### Run with Docker Compose (Linux server recommended):
  1. Build JAR first: `mvn clean package -DskipTests`
@@ -86,7 +86,7 @@ Currently, export data into `.xsl` file and `postgres` is not supported
  
     firebase.jsonfile.path
     firebase.storage.bucket
-    cron.expression
+    scheduling.fixed.delay.ms   (delay in ms after previous job finishes, default: 300000 = 5 min)
     fb.big.images.limit
     fb.big.images.load.timeout
     selenide.timeout
