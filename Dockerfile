@@ -9,15 +9,12 @@ RUN mvn dependency:go-offline -q
 COPY src ./src
 RUN mvn package -DskipTests -q
 
-## Stage 2: Runtime (Java 8 base)
-FROM openjdk:8-jre-slim
+## Stage 2: Runtime (Java 8 on Ubuntu 20.04)
+FROM eclipse-temurin:8-jre-focal
 
 # Install Firefox ESR and dependencies
 RUN apt-get update && apt-get install -y \
-    wget \
-    bzip2 \
-    ca-certificates \
-    firefox-esr \
+    firefox \
     libgtk-3-0 \
     libdbus-glib-1-2 \
     libxt6 \
