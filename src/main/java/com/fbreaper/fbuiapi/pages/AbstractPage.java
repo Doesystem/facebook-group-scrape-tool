@@ -31,6 +31,13 @@ public abstract class AbstractPage {
         Configuration.screenshots = false;
         Configuration.browserSize = "1920x1080";
 
+        // Use pre-installed geckodriver if available (Docker/Linux)
+        String geckodriverPath = System.getenv("WEBDRIVER_GECKO_DRIVER");
+        if (geckodriverPath != null && !geckodriverPath.isEmpty()) {
+            log.info("Using pre-installed geckodriver: {}", geckodriverPath);
+            System.setProperty("webdriver.gecko.driver", geckodriverPath);
+        }
+
         if (headless) {
             log.info("Configuring Firefox headless mode...");
             FirefoxOptions options = new FirefoxOptions();

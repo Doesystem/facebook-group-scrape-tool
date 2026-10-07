@@ -14,6 +14,9 @@ FROM eclipse-temurin:8-jre-focal
 
 # Install Firefox ESR and dependencies
 RUN apt-get update && apt-get install -y \
+    wget \
+    bzip2 \
+    ca-certificates \
     firefox \
     libgtk-3-0 \
     libdbus-glib-1-2 \
@@ -30,11 +33,22 @@ RUN apt-get update && apt-get install -y \
     fonts-liberation \
     && rm -rf /var/lib/apt/lists/*
 
+# Download geckodriver for linux64 (amd64) explicitly
+RUN GECKODRIVER_VERSION=0.35.0 && \
+    wget -q "https://github.com/mozilla/geckodriver/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-linux64.tar.gz" \
+    -O /tmp/geckodriver.tar.gz && \
+    tar -xzf /tmp/geckodriver.tar.gz -C /usr/local/bin/ && \
+    chmod +x /usr/local/bin/geckodriver && \
+    rm /tmp/geckodriver.tar.gz
+
 WORKDIR /app
 
 COPY --from=builder /build/target/fbreaper-*.jar app.jar
 COPY src/main/resources/application.properties application.properties
 COPY src/main/resources/properties/PostDataToFirebase.properties PostDataToFirebase.properties
+
+# Tell WebDriverManager to use the pre-installed geckodriver
+ENV WEBDRIVER_GECKO_DRIVER=/usr/local/bin/geckodriver
 
 ENTRYPOINT ["java", \
     "-jar", "app.jar", \
