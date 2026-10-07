@@ -15,7 +15,7 @@ FROM debian:bookworm-slim
 # Install Java and Firefox ESR
 RUN apt-get update && apt-get install -y \
     ca-certificates \
-    openjdk-17-jre-headless \
+    openjdk-8-jre-headless \
     firefox-esr \
     libgtk-3-0 \
     libdbus-glib-1-2 \
