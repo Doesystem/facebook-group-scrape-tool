@@ -9,13 +9,14 @@ RUN mvn dependency:go-offline -q
 COPY src ./src
 RUN mvn package -DskipTests -q
 
-## Stage 2: Runtime
-FROM debian:bookworm-slim
+## Stage 2: Runtime (Java 8 base)
+FROM openjdk:8-jre-slim
 
-# Install Java and Firefox ESR
+# Install Firefox ESR and dependencies
 RUN apt-get update && apt-get install -y \
+    wget \
+    bzip2 \
     ca-certificates \
-    openjdk-8-jre-headless \
     firefox-esr \
     libgtk-3-0 \
     libdbus-glib-1-2 \
