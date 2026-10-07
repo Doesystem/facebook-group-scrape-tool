@@ -1,9 +1,19 @@
+## Stage 1: Build JAR
+FROM maven:3.6-openjdk-8 AS builder
+
+WORKDIR /build
+COPY pom.xml .
+# Download dependencies first (cached if pom.xml unchanged)
+RUN mvn dependency:go-offline -q
+
+COPY src ./src
+RUN mvn package -DskipTests -q
+
+## Stage 2: Runtime
 FROM debian:bookworm-slim
 
-# Install Java 8 and Firefox ESR
+# Install Java and Firefox ESR
 RUN apt-get update && apt-get install -y \
-    wget \
-    bzip2 \
     ca-certificates \
     openjdk-17-jre-headless \
     firefox-esr \
@@ -22,10 +32,9 @@ RUN apt-get update && apt-get install -y \
     fonts-liberation \
     && rm -rf /var/lib/apt/lists/*
 
-# geckodriver will be auto-downloaded by WebDriverManager at runtime
 WORKDIR /app
 
-COPY target/fbreaper-*.jar app.jar
+COPY --from=builder /build/target/fbreaper-*.jar app.jar
 COPY src/main/resources/application.properties application.properties
 COPY src/main/resources/properties/PostDataToFirebase.properties PostDataToFirebase.properties
 
