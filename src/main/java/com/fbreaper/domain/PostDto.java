@@ -33,7 +33,6 @@ import lombok.Data;
         @Index(name = "idx_status", columnList = "status")
     }
 )
-})
 public class PostDto implements Comparable<PostDto> {
 
     @Id
