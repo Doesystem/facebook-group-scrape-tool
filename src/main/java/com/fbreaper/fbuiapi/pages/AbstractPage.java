@@ -27,8 +27,9 @@ public abstract class AbstractPage {
         Configuration.timeout = timeout;
         Configuration.browser = BrowserType.FIREFOX;
         Configuration.headless = headless;
-        Configuration.savePageSource = false;
-        Configuration.screenshots = false;
+        Configuration.savePageSource = true;
+        Configuration.screenshots = true;
+        Configuration.reportsFolder = "/app/reports";
         Configuration.browserSize = "1920x1080";
 
         // Use pre-installed geckodriver if available (Docker/Linux)

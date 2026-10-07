@@ -36,6 +36,9 @@ public class GroupPage extends AbstractPage {
         Selenide.open(url);
         // รอให้ popup โหลดขึ้นมาก่อน
         Selenide.sleep(4000);
+        // log page title เพื่อ debug
+        log.info("Page title: {}", Selenide.title());
+        log.info("Page URL: {}", com.codeborne.selenide.WebDriverRunner.getWebDriver().getCurrentUrl());
         // คลิก close button ของ popup login แทน ESCAPE
         log.info("Clicking popup close button...");
         SelenideElement closeBtn = $x("//*[@aria-label='Close']");
